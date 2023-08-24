@@ -1,0 +1,9 @@
+defaults:
+  - data: data_config.yaml
+  - model: model_config.yaml
+
+training:
+  batch_size: 2
+  learning_rate: 0.0004
+  num_epochs: 10
+  device: cuda   # Change to "cpu" if using CPU
