@@ -2,21 +2,29 @@ sample_rate: 16000
 batch_size: 2
 deterministic: False
 train:
-  "clean_path": "D:/AudioProjects/Datasets/Noise/AudioSet/val/valid_16KHz"
-  "noise_path": "data/val"
-  "mixed_path": False
+  "target_path": ["../../../data/target"]
+  "target_prob": [1.0]
+  "noise_path": ["../../../data/noise"]
+  "noise_prob": [1.0]
+  "input_path": []
   "length_range": [3, 5]
+  "target_seqs": 2
+  "silence": 1.0
   "ds_size": 8
 
 val:
-  "clean_path": "D:/AudioProjects/Datasets/Noise/AudioSet/val/valid_16KHz"
-  "noise_path": "data/val"
-  "mixed_path": False
+  "target_path": ["../../../data/target"]
+  "target_prob": [1.0]
+  "noise_path": ["../../../data/noise"]
+  "noise_prob": [1.0]
+  "input_path": []
   "length_range": [3, 5]
+  "target_seqs": 2
   "ds_size": 2
+  "silence": 1.0
 
 test:
-  "clean_path": False
-  "mixed_path": False
+  "target_path": False
+  "input_path": False
   
   # Add other data_config settings here

@@ -1,9 +1,9 @@
-import os
-import json
+import random
 import torch
 import torchaudio
 import torchaudio.transforms as T
 from torch.utils.data import DataLoader, Dataset
+from dataset.metadata import Metadata
 
 class SpeechEnhancementDataset(Dataset):
     def __init__(
@@ -15,30 +15,31 @@ class SpeechEnhancementDataset(Dataset):
         self.sample_rate = sample_rate
 
         # Load metadata
-        self.get_metadata()
-
-    def get_metadata(self):
-        with open(os.path.join(self.data.clean_path, "metadata.json"), "r") as metadata_file:
-            self.clean_metadata = json.load(metadata_file)
-        if not self.data.mixed_path:
-            with open(os.path.join(self.data.noise_path, "metadata.json"), "r") as metadata_file:
-                self.noise_metadata = json.load(metadata_file)
-        else:
-            with open(os.path.join(self.data.mixed_path, "metadata.json"), "r") as metadata_file:
-                self.mixed_metadata = json.load(metadata_file)
+        self.md = Metadata(data)
+        self.ds = self.md.generate_metadata()
+        self.targets = self.get_subset()
 
     def read_audio(self, file_path, offset, frames):
-        waveform, sample_rate = torchaudio.load(file_path, normalize=True, frame_offset=offset,num_frames=frames)
+        waveform, sample_rate = torchaudio.load(file_path, normalize=True, frame_offset=offset, num_frames=frames)
         if sample_rate != self.sample_rate:
             transform = T.Resample(sample_rate, self.sample_rate)
             waveform = transform(waveform)
         return waveform
+    
+    def get_subset(self):
+        size_ = self.data.ds_size * self.data.target_seqs # TODO: improve and make sure it works
+        out = []
+        assert len(self.data.target_prob) == len(self.ds["target_path"]), "lenght should be equal" 
+        for i in range(len(self.ds["target_path"])):
+            range_ = int(self.data.target_prob[i] *size_)
+            out.extend(self.ds["target_path"][i][:range_])
+        return out
 
     def __len__(self):
-        return len(self.clean_metadata) # TODO: lenght according number specified in config file
+        return self.data.ds_size * self.data.target_seqs
 
     def __getitem__(self, idx):
-        info = self.clean_metadata[idx]
+        info = self.targets[idx]
         file_path = info["file_path"]
 
         # Load and normalize audio signal
